@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.study.auth.service.RedisService;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -72,22 +72,21 @@ public class JwtTokenProvider {
 	
 	// Access token 검증
 	public boolean isValidAccessToken(String accessToken) {
-	    try {
-	        Claims claims = Jwts.parserBuilder()
-	        		.setSigningKey(generateSignInKey())
-	        		.build()
-	        		.parseClaimsJws(accessToken)
-	        		.getBody();
-	        
-	        if (!(claims.get("type").equals("access"))) {
-	            return false;
-	        } 
-	        return claims.getExpiration().after(new Date());
-	        
-	    } catch (ExpiredJwtException e) {
-	    	log.info("만료된 토큰");
-	        return false;
-	    } 
+		try {
+			Claims claims = Jwts.parserBuilder()
+					.setSigningKey(generateSignInKey())
+					.build()
+					.parseClaimsJws(accessToken)
+					.getBody();
+
+			if (claims.get("type").equals("access") && claims.getExpiration().after(new Date())) {
+				return true;
+			}
+
+		} catch (JwtException e) {
+			throw new JwtException("올바르지 않은 토큰입니다. " + e.getMessage());
+		}
+		return false;
 	}
 
 	// Refresh token 검증
