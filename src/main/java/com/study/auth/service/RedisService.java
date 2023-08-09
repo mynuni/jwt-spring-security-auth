@@ -30,7 +30,7 @@ public class RedisService {
 	
 	public boolean isValidRefreshToken(String token) {
         String key = REFRESH_PREFIX + token;
-        return redisTemplate.hasKey(key);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 	
 	public void addToBlacklist(String token) {
@@ -40,7 +40,7 @@ public class RedisService {
 	
 	public boolean isBlacklisted(String token) {
         String key = BLACKLIST_PREFIX + token;
-        return redisTemplate.hasKey(key);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
 }
